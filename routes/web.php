@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +16,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('pdf');
+});
+
+Route::group(['prefix' => '/export'], function () {
+    Route::get('/', [ExportController::class, 'index']);
+    Route::post('/', [ExportController::class, 'generate']);
+    Route::post('/pdf', [ExportController::class, 'pdf']);
+    Route::post('/docx', [ExportController::class, 'docx']);
 });
