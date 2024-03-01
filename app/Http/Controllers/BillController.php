@@ -40,7 +40,8 @@ class BillController extends Controller
 
         $bills = Bill::get()
             ->where('date', '>=', $input['start_date'])
-            ->where('date', '<=', Carbon::createFromFormat('Y-m-d', $input['end_date'])->addDay()); // jam 00:00 maka +1 supaya ambil data hari ini
+            ->where('date', '<=', Carbon::createFromFormat('Y-m-d', $input['end_date'])->addDay()) // jam 00:00 maka +1 supaya ambil data hari ini
+            ->orderBy('date');
 
         $error_code = '0000';
         $message = 'Success';
@@ -82,7 +83,7 @@ class BillController extends Controller
             }
         }
 
-        // // Perform OCR processing to extract date and amount from the image
+        // Perform OCR processing to extract date and amount from the image
         $extractedData = self::performOCR($input);
 
         if ($extractedData['error_code'] != '0000') {
@@ -162,22 +163,21 @@ class BillController extends Controller
         $parts = explode("\n", $text);
         $parts = array_values(array_filter($parts));
 
-        if ($parts[1] == 'QR a') { // QR BCA
-            $format = 1;
-        } elseif ($parts[0] == 'xs') { // //QR Gopay
-            $format = 2;
-        }
-
-        if ($format == 1) {
+        if ($parts[1] == 'QR a' || $parts[1] == 'QR 0') { // QR BCA Mobile
             $rawDate = Carbon::createFromFormat('d/m H:i:s', $parts[3]); // 03/11 19:43:01
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[5], 3)); // Rp 15.000
             $error_code = '0000';
             $message = 'Success';
-        } elseif ($format == 2) {
+        } elseif ($parts[0] == 'xs') { // QR Gopay
             $rawDateOnly = substr($parts[7], -10); // 3 Nov 2023
             $rawTime = substr($parts[6], -7); // 9:24 PM
             $rawDate = Carbon::createFromFormat('j M Y g:i A', $rawDateOnly . $rawTime);
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[1], 2)); // Rp33.500
+            $error_code = '0000';
+            $message = 'Success';
+        } elseif ($parts[0] == 'Pembayaran QRIS Berhasil') { // QR myBca
+            $rawDate = Carbon::createFromFormat('j M Y H:i:s', $parts[4]); // 21 Feb 2024 13:35:33
+            $amount = (float) preg_replace('/[^\d]/', '', substr($parts[1], 4, -3)); // IDR 20,000.00
             $error_code = '0000';
             $message = 'Success';
         } else {
