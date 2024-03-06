@@ -38,10 +38,10 @@ class BillController extends Controller
             }
         }
 
-        $bills = Bill::get()
-            ->where('date', '>=', $input['start_date'])
+        $bills = Bill::where('date', '>=', $input['start_date'])
             ->where('date', '<=', Carbon::createFromFormat('Y-m-d', $input['end_date'])->addDay()) // jam 00:00 maka +1 supaya ambil data hari ini
-            ->orderBy('date');
+            ->orderBy('date')
+            ->get();
 
         $error_code = '0000';
         $message = 'Success';
@@ -157,7 +157,7 @@ class BillController extends Controller
 
     private function performOCR($input)
     {
-        $return = []; $format = 0;
+        $return = [];
         $text = (new TesseractOCR($input['image']))->run();
 
         $parts = explode("\n", $text);
@@ -178,6 +178,11 @@ class BillController extends Controller
         } elseif ($parts[0] == 'Pembayaran QRIS Berhasil') { // QR myBca
             $rawDate = Carbon::createFromFormat('j M Y H:i:s', $parts[4]); // 21 Feb 2024 13:35:33
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[1], 4, -3)); // IDR 20,000.00
+            $error_code = '0000';
+            $message = 'Success';
+        } elseif ($parts[1] == 'Anda baru saja melakukan transaksi dengan menggunakan fasilitas myBCA.') { // QR myBCA Email
+            $rawDate = Carbon::createFromFormat('d M Y H:i:s', Str::substr($parts[4], -20)); // Tanggal Transaksi : 05 Mar 2024 18:00:16
+            $amount = (float) preg_replace('/[^\d]/', '', Str::between($parts[13], 'Total Bayar : IDR ', '.00')); // : IDR 20,000.00
             $error_code = '0000';
             $message = 'Success';
         } else {

@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('pdf');
+    // return view('pdf');
 });
 
 Route::group(['prefix' => '/export'], function () {

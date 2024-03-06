@@ -7,5 +7,5 @@ Flow of Application:
 6. Send the document generated into the response API.
 
 Notes:
--- Step 1-3 is correctly working on some of the screenshot given (QR BCA, QR Gopay, QR myBCA) and still needs further development from different format image.
+-- Step 1-3 is correctly working on some of the screenshot given (QR BCA, QR Gopay, QR myBCA, QR myBCA Email) and still needs further development from different format image.
 -- Step 4-6 is still on progress.

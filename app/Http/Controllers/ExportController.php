@@ -36,10 +36,19 @@ class ExportController extends Controller
         foreach ($dataBill['data'] as $key => $bill) {
             $dataBill['data'][$key]['base64_img'] = 'data:image/png;base64,' . base64_encode(Storage::get($bill['image_path']));
         }
+        
+        $group = '';
+        foreach ($dataBill['data'] as $key => $value) {
+            $group_db = Carbon::createFromFormat('Y-m-d H:i:s', $value['date'])->format('Y-m-d');
+            if ($group != $group_db) {
+                $group = $group_db;
+            }
+            $result[$group][] = $value;
+        }
 
-        $pdf = Pdf::loadView('export.pdf', ['dataBill' => $dataBill['data']]);
+        $pdf = Pdf::loadView('export.pdf', ['dataBill' => $result]);
 
-        return $pdf->download(Carbon::now() . '.pdf');
+        return $pdf->stream(Carbon::now() . '.pdf');
     }
 
     public function pdf(Request $request) {
