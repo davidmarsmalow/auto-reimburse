@@ -11,5 +11,5 @@ class Bill extends Model
 
     protected $table = 'bills';
 
-    protected $fillable = ['date', 'amount', 'image_path'];
+    protected $fillable = ['date', 'amount', 'type','image_path'];
 }
