@@ -30,7 +30,7 @@
         <tbody>
             @foreach ($dataBill as $key => $dateGroup)
                 <tr>
-                    <td>{{ Carbon::createFromFormat('Y-m-d', $key)->format('j F Y') }}</td>
+                    <td>{{ $key }}</td>
                     <td>
                         @foreach ($dateGroup as $bill)
                             <img src="{{ $bill['base64_img'] }}" alt="" width="100">
