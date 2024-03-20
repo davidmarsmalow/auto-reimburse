@@ -101,6 +101,7 @@ class BillController extends Controller
             $bill = new Bill([
                 'date' => $extractedData['datetime'],
                 'amount' => $extractedData['amount'],
+                'type' => $extractedData['type'],
                 'image_path' => $input['image']->store('bills'), // Store the image in a storage path
             ]);
             $bill->save();
@@ -199,6 +200,7 @@ class BillController extends Controller
         $return['message']      = $message;
         $return['datetime']     = $date;
         $return['amount']       = $amount;
+        $return['type']         = 1; // hardcode for now (Food)
 
         return $return;
     }
