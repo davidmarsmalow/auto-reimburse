@@ -39,6 +39,7 @@ class ExportController extends Controller
         }
         
         $group = '';
+        $result = [];
         foreach ($dataBill['data'] as $key => $value) {
             $group_db = $value['date'];
             if ($group != $group_db) {
