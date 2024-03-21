@@ -167,6 +167,7 @@ class BillController extends Controller
         if ($parts[1] == 'QR a' || $parts[1] == 'QR 0') { // QR BCA Mobile
             $rawDate = Carbon::createFromFormat('d/m H:i:s', $parts[3]); // 03/11 19:43:01
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[5], 3)); // Rp 15.000
+            $type = 1;
             $error_code = '0000';
             $message = 'Success';
         } elseif ($parts[0] == 'xs') { // QR Gopay
@@ -174,16 +175,19 @@ class BillController extends Controller
             $rawTime = substr($parts[6], -7); // 9:24 PM
             $rawDate = Carbon::createFromFormat('j M Y g:i A', $rawDateOnly . $rawTime);
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[1], 2)); // Rp33.500
+            $type = 1;
             $error_code = '0000';
             $message = 'Success';
         } elseif ($parts[0] == 'Pembayaran QRIS Berhasil') { // QR myBca
             $rawDate = Carbon::createFromFormat('j M Y H:i:s', $parts[4]); // 21 Feb 2024 13:35:33
             $amount = (float) preg_replace('/[^\d]/', '', substr($parts[1], 4, -3)); // IDR 20,000.00
+            $type = 1;
             $error_code = '0000';
             $message = 'Success';
         } elseif ($parts[1] == 'Anda baru saja melakukan transaksi dengan menggunakan fasilitas myBCA.') { // QR myBCA Email
             $rawDate = Carbon::createFromFormat('d M Y H:i:s', Str::substr($parts[4], -20)); // Tanggal Transaksi : 05 Mar 2024 18:00:16
             $amount = (float) preg_replace('/[^\d]/', '', Str::between($parts[13], 'Total Bayar : IDR ', '.00')); // : IDR 20,000.00
+            $type = 1;
             $error_code = '0000';
             $message = 'Success';
         } else {
@@ -200,7 +204,7 @@ class BillController extends Controller
         $return['message']      = $message;
         $return['datetime']     = $date;
         $return['amount']       = $amount;
-        $return['type']         = 1; // hardcode for now (Food)
+        $return['type']         = $type;
 
         return $return;
     }

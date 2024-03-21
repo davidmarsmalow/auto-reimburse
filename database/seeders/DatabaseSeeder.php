@@ -29,6 +29,10 @@ class DatabaseSeeder extends Seeder
         \App\Models\BillType::factory()->create([
             'label' => 'Parking Fee'
         ]);
+        
+        \App\Models\BillType::factory()->create([
+            'label' => 'Medicine & Vitamins'
+        ]);
 
         // \App\Models\User::factory()->create([
         //     'name' => 'Test User',
