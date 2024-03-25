@@ -190,9 +190,27 @@ class BillController extends Controller
             $type = 1;
             $error_code = '0000';
             $message = 'Success';
+        } elseif ($parts[3] == 'Transaction Detail x') { // Gopay History
+            $rawDateOnly = Str::after($parts[7], 'Date '); // Date 20 Mar 2024
+            $rawTime = Str::after($parts[6], 'Time '); // Time 05:59 PM
+            $rawDate = Carbon::createFromFormat('j M Y g:i A', $rawDateOnly . $rawTime);
+            $amount = (float) preg_replace('/[^\d]/', '', Str::after($parts[1], 'Rp')); // Rp33.500
+            $orderId = Str::after($parts[9], 'Order ID ');
+            
+            if (Str::startsWith($orderId, 'RB')) { // Order ID RB-172760-0842018 ![) // Order ID RB-146012-0942697 [Tj
+                $type = 2; // Transport
+                $error_code = '0000';
+                $message = 'Success';
+            } else {
+                $type = 0;
+                $error_code = '0003';
+                $message = 'Invalid: Unknown Type';
+                $return['data'] = $parts;
+            }
         } else {
             $rawDate = Carbon::now();
             $amount = 0;
+            $type = 0;
             $error_code = '0003';
             $message = 'Invalid: Unknown Format';
             $return['data'] = $parts;
