@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ApiFormatter;
 use App\Models\Bill;
+use App\Models\BillType;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -38,7 +39,8 @@ class BillController extends Controller
             }
         }
 
-        $bills = Bill::where('date', '>=', $input['start_date'])
+        $bills = Bill::with('billType')
+            ->where('date', '>=', $input['start_date'])
             ->where('date', '<=', Carbon::createFromFormat('Y-m-d', $input['end_date'])->addDay()) // jam 00:00 maka +1 supaya ambil data hari ini
             ->orderBy('date')
             ->get();
@@ -56,7 +58,11 @@ class BillController extends Controller
      */
     public function create()
     {
-        //
+        $type = BillType::get();
+
+        return view('bills.create', [
+            'type' => $type,
+        ]);
     }
 
     /**
@@ -94,34 +100,61 @@ class BillController extends Controller
             return ApiFormatter::responseData($error_code, $message, $data, $uuid, $status_code);
         }
 
-        // Save the extracted data to the database
-        try {
-            DB::beginTransaction();
+        $extractedData['image'] = $input['image'];
+        $saveBill = self::save($extractedData);
 
-            $bill = new Bill([
-                'date' => $extractedData['datetime'],
-                'amount' => $extractedData['amount'],
-                'type' => $extractedData['type'],
-                'image_path' => $input['image']->store('bills'), // Store the image in a storage path
-            ]);
-            $bill->save();
-
+        if ($saveBill === TRUE) {
             $error_code = '0000';
             $message = 'Success';
             $status_code = 200;
             $data = $extractedData;
-
-            DB::commit();
-        } catch (\Throwable $th) {
-            DB::rollBack();
-
+        } else {
             $error_code = '0002';
-            $message = $th->getMessage();
+            $message = $saveBill;
             $status_code = 200;
             $data = [];
         }
 
         return ApiFormatter::responseData($error_code, $message, $data, $uuid, $status_code);
+    }
+
+    public function storeBill(Request $request)
+    {
+        $validatedData = $request->validate([
+            'date'      => 'required|date|date_format:Y-m-d',
+            'amount'    => 'required|numeric',
+            'bill_type' => 'required|integer|exists:App\Models\BillType,id',
+            'image'     => 'required|image', // Validate that the uploaded file is an image
+        ]);
+
+        $saveBill = self::save($validatedData);
+
+        if ($saveBill === TRUE) {
+            return redirect('/')->with('success', 'Success');
+        } else {
+            return redirect('/')->with('failed', $saveBill);
+        }
+    }
+
+    public function save($param) {
+        // Save the extracted data to the database
+        try {
+            DB::beginTransaction();
+
+            $bill = new Bill([
+                'date' => $param['datetime'],
+                'amount' => $param['amount'],
+                'type' => $param['type'],
+                'image_path' => $param['image']->store('bills'), // Store the image in a storage path
+            ]);
+            $bill->save();
+
+            DB::commit();
+            return TRUE;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $th->getMessage();
+        }
     }
 
     /**

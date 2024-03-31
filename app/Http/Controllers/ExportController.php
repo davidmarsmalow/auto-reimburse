@@ -33,9 +33,11 @@ class ExportController extends Controller
 
         $dataBill = json_decode($responseContent, true);
         
+        $total = 0;
         foreach ($dataBill['data'] as $key => $bill) {
             $dataBill['data'][$key]['date'] = Carbon::createFromFormat('Y-m-d H:i:s', $bill['date'])->format('j F Y');
             $dataBill['data'][$key]['base64_img'] = 'data:image/png;base64,' . base64_encode(Storage::get($bill['image_path']));
+            $total += $bill['amount'];
         }
         
         $group = '';
@@ -48,7 +50,11 @@ class ExportController extends Controller
             $result[$group][] = $value;
         }
 
-        $pdf = Pdf::loadView('export.pdf', ['dataBill' => $result]);
+        $pdf = Pdf::loadView('export.pdf', [
+            'dataBill'      => $dataBill['data'],
+            'groupedBill'   => $result,
+            'total'         => $total,
+        ]);
 
         return $pdf->stream(Carbon::now() . '.pdf');
     }

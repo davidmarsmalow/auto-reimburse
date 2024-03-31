@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillController;
 use App\Http\Controllers\ExportController;
 use Illuminate\Support\Facades\Route;
 
@@ -14,9 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    // return view('pdf');
-});
+Route::get('/', [BillController::class, 'create']);
+Route::post('/', [BillController::class, 'storeBill']);
 
 Route::group(['prefix' => '/export'], function () {
     Route::get('/', [ExportController::class, 'index']);
