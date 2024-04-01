@@ -223,7 +223,7 @@ class BillController extends Controller
             $type = 1;
             $error_code = '0000';
             $message = 'Success';
-        } elseif ($parts[3] == 'Transaction Detail x') { // Gopay History
+        } elseif (Str::startsWith($parts[3], 'Transaction Detail')) { // Gopay History
             $rawDateOnly = Str::after($parts[7], 'Date '); // Date 20 Mar 2024
             $rawTime = Str::after($parts[6], 'Time '); // Time 05:59 PM
             $rawDate = Carbon::createFromFormat('j M Y g:i A', $rawDateOnly . $rawTime);
@@ -232,6 +232,10 @@ class BillController extends Controller
             
             if (Str::startsWith($orderId, 'RB')) { // Order ID RB-172760-0842018 ![) // Order ID RB-146012-0942697 [Tj
                 $type = 2; // Transport
+                $error_code = '0000';
+                $message = 'Success';
+            } elseif (Str::startsWith($orderId, 'mbrs')) { // Order ID mbrs--9fd640f6-05f1-4... [Fj
+                $type = 4; // Park
                 $error_code = '0000';
                 $message = 'Success';
             } else {
