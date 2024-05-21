@@ -244,6 +244,12 @@ class BillController extends Controller
                 $message = 'Invalid: Unknown Type';
                 $return['data'] = $parts;
             }
+        } elseif (Str::contains($parts[0], 'Jago')) {
+            $rawDate = Carbon::createFromFormat('d M Y H:i T', Str::after($parts[8], 'Transaction Date ')); // Transaction Date 18 May 2024 11:47 WIB
+            $amount = (float) preg_replace('/[^\d]/', '', Str::after($parts[7], 'Amount Rp')); // Amount Rp32.250
+            $type = 1;
+            $error_code = '0000';
+            $message = 'Success';
         } else {
             $rawDate = Carbon::now();
             $amount = 0;
