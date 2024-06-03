@@ -127,6 +127,9 @@ class BillController extends Controller
             'image'     => 'required|image', // Validate that the uploaded file is an image
         ]);
 
+        $validatedData['datetime'] = $validatedData['date'];
+        $validatedData['type'] = $validatedData['bill_type'];
+
         $saveBill = self::save($validatedData);
 
         if ($saveBill === TRUE) {
@@ -218,6 +221,7 @@ class BillController extends Controller
             $error_code = '0000';
             $message = 'Success';
         } elseif ($parts[1] == 'Anda baru saja melakukan transaksi dengan menggunakan fasilitas myBCA.') { // QR myBCA Email
+            $parts[4] = Str::replace('Mei', 'May', $parts[4]);
             $rawDate = Carbon::createFromFormat('d M Y H:i:s', Str::substr($parts[4], -20)); // Tanggal Transaksi : 05 Mar 2024 18:00:16
             $amount = (float) preg_replace('/[^\d]/', '', Str::between($parts[13], 'Total Bayar : IDR ', '.00')); // : IDR 20,000.00
             $type = 1;
