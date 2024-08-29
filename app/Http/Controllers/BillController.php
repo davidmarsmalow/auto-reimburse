@@ -254,6 +254,12 @@ class BillController extends Controller
             $type = 1;
             $error_code = '0000';
             $message = 'Success';
+        } elseif (Str::contains($parts[1], 'Jago')) {
+            $rawDate = Carbon::createFromFormat('d M Y H:i T', $parts[12]); // 08 August 2024 10:19 WIB
+            $amount = (float) preg_replace('/[^\d]/', '', Str::after($parts[11], 'Rp')); // Rp32.250
+            $type = 1;
+            $error_code = '0000';
+            $message = 'Success';
         } else {
             $rawDate = Carbon::now();
             $amount = 0;
